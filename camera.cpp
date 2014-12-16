@@ -68,7 +68,9 @@ void Camera::powerOff()
 
 int Camera::getCapacity()
 {
-    QNetworkReply reply * = get("get_unusedcapacity", params);
+    QNetworkReply *reply = get("get_unusedcapacity", params);
 
-
+    // FIXME
 }
+
+void Camera::takeImage()

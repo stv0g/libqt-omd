@@ -23,17 +23,15 @@ public:
         MODE_SHUTTER
     };
 
-    enum TakeMode {
-        PROG_IAUTO,
-        PROG_P,
-        PROG_A,
-        PROG_S,
-        PROG_M,
-        PROG_ART
+    enum ConnectMode {
+        CONNECT_PRIVATE,
+        CONNECT_SHARED
     };
 
     QList<QString> getImageList(bool rsv = false);
+    QImage         getLastImage();
     QImage         getImage(QString name, QSize resolution = QSize(-1, -1));
+    QImage         getThumbnail(QString name);
 
 
     bool isOnline();
@@ -41,12 +39,14 @@ public:
     void setProperty(QString key, QString value);
     int getCapacity();
 
+    void setTakeMode(enum TakeMode m);
+
+
 public slots:
     void takeShot();
     void powerOff();
 
-    void startLiveView(QSize resolution = QSize(640, 480));
-    void stopLiveView();
+    LiveView startLiveView(QSize resolution = QSize(640, 480));
 
 protected slots:
     void requestFinished(QNetworkReply *);
@@ -63,8 +63,17 @@ protected:
     QNetworkReply  get(QString cgi, QPair<QString, QString> params = QPair<QString, QString>());
     QNetworkReply post(QString cgi, QPair<QString, QString> params = QPair<QString, QString>(), QDomDocument body);
 
-    int       setMode(enum Mode mode);
+    void      setMode(enum Mode mode);
     enum Mode getMode();
+
+    void getCommandList();
+
+    /* Parsers */
+    void parseCommandList(QNetworkReply *reply);
+    void parseProperties(QNetworkReply *reply);
+    void parseImageList(QNetworkReply *reply);
+    void parseCapacity(QNetworkReply *reply);
+    void parseConnectMode(QNetworkReply *reply);
 
     QNetworkAccessManager networkManager;
     QHostAddress address;

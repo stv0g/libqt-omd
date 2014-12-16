@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     camera.cpp \
     liveview.cpp \
-    viewer.cpp
+    viewer.cpp \
+    cameraproperties.cpp
 
 HEADERS  += mainwindow.h \
     camera.h \
     liveview.h \
-    viewer.h
+    viewer.h \
+    cameraproperties.h
 
 FORMS    += mainwindow.ui
