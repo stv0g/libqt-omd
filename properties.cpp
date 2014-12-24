@@ -1,12 +1,12 @@
 #include <QtDebug>
 
-#include "cameraproperties.h"
+#include "properties.h"
 
-CameraProperties::CameraProperties(QDomNode desclist)
+Properties::Properties(QDomNode desclist)
 {
     QDomNode desc = desclist.firstChild();
     while (!desc.isNull()) {
-        CameraProperty prop(desc);
+        Property prop(desc);
 
         if (prop.isValid()) {
             properties[prop.key] = prop;
@@ -18,7 +18,7 @@ CameraProperties::CameraProperties(QDomNode desclist)
 }
 
 
-CameraProperty::CameraProperty(QDomNode desc) :
+Property::Property(QDomNode desc) :
 {
     key   = desc.firstChildElement("propname").text();
     value = desc.firstChildElement("value").text();
@@ -33,7 +33,7 @@ CameraProperty::CameraProperty(QDomNode desc) :
         flags |= PROP_VALID;
 }
 
-CameraProperty& CameraProperty::operator =(const QString &newValue)
+Property& Property::operator =(const QString &newValue)
 {
     if (valid.contains(newValue)) {
         value = newValue;
@@ -44,7 +44,7 @@ CameraProperty& CameraProperty::operator =(const QString &newValue)
     emit propertyChanged(key, value);
 }
 
-bool CameraProperty::isValid(QString check)
+bool Property::isValid(QString check)
 {
    return valid.contains(check.isEmpty() ? value : check);
 }
