@@ -1,20 +1,21 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <QPair>
-#include <QString>
-#include <QImage>
-#include <QNetworkAccessManager>
 #include <QHostAddress>
+#include <QImage>
 #include <QDateTime>
 #include <QtXml/QDomDocument>
 
 #include "liveview.h"
 
-class Camera
+class QNetworkAccessManager;
+class QNetworkReply;
+class QNetworkRequest;
+
+class Camera : public QObject
 {
     Q_OBJECT
-    // FIXME add Q_PROPERTY
+    // FIXME add Q_PROPERTY's
 
 public:
     /* Enums */
@@ -47,7 +48,7 @@ public:
     void                requestCapacity();
     void                requestConnectMode();
     void                requestCommandList();
-    void                requestImageList(bool reserved = false);
+    void                requestImageList(QString dir = "/DCIM/100OLYMP", bool reserved = false);
     void                requestImage(QString name = QString(), QSize resolution = QSize(-1, -1));
 
     /* Synchronous getters */
@@ -63,7 +64,7 @@ public:
 
     /* Cached getters */
     bool                isOnline();
-    enum Mode           getCamMode();
+    enum CamMode        getCamMode();
 
 public slots:
     void                switchCamMode(enum CamMode mode);
@@ -74,9 +75,9 @@ public slots:
     void                setTimeDiff(QDateTime t);
 
 signals:
-    void                receivedImage(QImage *);
+    void                receivedImage(QImage);
     void                changedProperty(QString key, QString value);
-    void                changedMode(enum Mode);
+    void                changedMode(enum CamMode);
     void                connected(enum ConnectMode);
 
 protected slots:
@@ -84,27 +85,34 @@ protected slots:
 
 protected:
     /* Network requests */
-    QNetworkRequest     makeRequest(QString cgi, QPair<QString, QString> params);
-    QNetworkReply               get(QString cgi, QPair<QString, QString> params = QPair<QString, QString>());
-    QNetworkReply              post(QString cgi, QPair<QString, QString> params = QPair<QString, QString>(), QDomDocument body);
+    QNetworkRequest     makeRequest(QString cgi, QMap<QString, QString> params);
+    QNetworkReply *             get(QString cgi, QMap<QString, QString> params = QMap<QString, QString>());
+    QNetworkReply *            post(QString cgi, QMap<QString, QString> params = QMap<QString, QString>(), QDomDocument body = QDomDocument());
 
     /* Parsers */
-    void                parseCamInfo(QDomDocument *body);
-    void                parseCapacity(QDomDocument *body);
-    void                parseConnectMode(QDomDocument *body);
-    void                parseCommandList(QDomDocument *body);
-    void                parseCamProperties(QDomDocument *body);
-    void                parseImage(QByteArray *body);
+    void                parseEmpty(QString cgi);
+    void                parseXml(QString cgi, QDomDocument body);
+    void                parseList(QString cgi, QByteArray body);
+    void                parseImage(QString cgi, QByteArray body);
+
+    void                parseCamInfo(QDomDocument body);
+    void                parseCapacity(QDomDocument body);
+    void                parseConnectMode(QDomDocument body);
+    void                parseCommandList(QDomDocument body);
+    void                parseProperties(QDomDocument body);
+    void                parseTakeMotion(QDomDocument body);
+    void                parseTakeMisc(QDomDocument body);
 
     /* Helpers */
-    void                completeRequests();
+    void                completePendingRequests();
+    void                initialize();
 
     /* Members */
-    QHostAddress             camAddress;
-    QList<QNetworkReply *>   pendingReplies;
-    QMap<QString, QDateTime> cacheMap;
-    QNetworkAccessManager   *networkManager;
-    LiveView                *liveView;
+    QHostAddress                camAddress;
+    QList<QNetworkReply *>      pendingReplies;
+    QMap<QString, QDateTime>    cacheMap;
+    QNetworkAccessManager *     networkManager;
+    LiveView *                  liveView;
 
     /* Properties */
     enum CamMode        camMode;
@@ -121,7 +129,7 @@ protected:
     QList<QString>      reservedImageList;
 
     /* Constants */
-    static const QString userAgent = "OI.Share v2";
+    static const QString userAgent;
 };
 
 #endif // CAMERA_H

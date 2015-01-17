@@ -21,3 +21,5 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+CONFIG += c++11

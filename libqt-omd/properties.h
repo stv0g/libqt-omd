@@ -16,11 +16,9 @@ public:
     Property& operator[](const QString &key);
 
 protected:
-
     Camera *cam;
 
     QMap<QString, Property> properties;
-
 };
 
 class Property
@@ -35,15 +33,13 @@ class Property
     };
 
 public:
+    Property() { }
+    Property(QDomElement desc);
 
     Property& operator =(const QString &value);
     operator QString();
 
-    bool isValid(QString value = QString);
-
-signals:
-    void changed(QString key, QString value);
-
+    bool isValid(QString value = QString());
 
 protected:
     Property(QDomNode desc);
