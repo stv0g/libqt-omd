@@ -12,7 +12,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QNetworkRequest;
 
-class Camera : public QObject
+class OiCamera : public QObject
 {
     Q_OBJECT
     // FIXME add Q_PROPERTY's
@@ -38,7 +38,7 @@ public:
         ZOOM_TELETERM
     };
 
-    Camera();
+    OiCamera();
 
     void                setProperty(QString key, QString value);
     QString             getProperty(QString key);
@@ -110,9 +110,7 @@ protected:
     /* Members */
     QHostAddress                camAddress;
     QList<QNetworkReply *>      pendingReplies;
-    QMap<QString, QDateTime>    cacheMap;
     QNetworkAccessManager *     networkManager;
-    LiveView *                  liveView;
 
     /* Properties */
     enum CamMode        camMode;

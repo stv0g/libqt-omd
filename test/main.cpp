@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     Viewer w;
-    Camera c;
+    OiCamera c;
 
     w.show();
 

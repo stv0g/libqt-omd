@@ -6,24 +6,24 @@
 
 #include "camera.h"
 
-class Property;
+class OiProperty;
 
-class Properties
+class OiProperties
 {
 public:
-    Properties(QDomNode desclist);
+    OiProperties(QDomNode desclist);
 
-    Property& operator[](const QString &key);
+    OiProperty& operator[](const QString &key);
 
 protected:
-    Camera *cam;
+    OiCamera *cam;
 
-    QMap<QString, Property> properties;
+    QMap<QString, OiProperty> properties;
 };
 
-class Property
+class OiProperty
 {
-    friend class Properties;
+    friend class OiProperties;
 
     enum {
         PROP_VALID      = 1,
@@ -33,16 +33,16 @@ class Property
     };
 
 public:
-    Property() { }
-    Property(QDomElement desc);
+    OiProperty() { }
+    OiProperty(QDomElement desc);
 
-    Property& operator =(const QString &value);
+    OiProperty& operator =(const QString &value);
     operator QString();
 
     bool isValid(QString value = QString());
 
 protected:
-    Property(QDomNode desc);
+    OiProperty(QDomNode desc);
 
     QStringList valid;
 

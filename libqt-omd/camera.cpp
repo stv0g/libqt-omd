@@ -8,21 +8,22 @@
 #include <QEventLoop>
 
 #include "image.h"
+#include "properties.h"
 #include "camera.h"
 
-const QString Camera::userAgent = "libqt-omd v0.1";
+const QString OiCamera::userAgent = "libqt-omd v0.1";
 
-Camera::Camera() :
+OiCamera::OiCamera() :
     camAddress("192.168.0.10")
 {
     networkManager = new QNetworkAccessManager;
 
-    connect(networkManager, &QNetworkAccessManager::finished, this, &Camera::requestFinished);
+    connect(networkManager, &QNetworkAccessManager::finished, this, &OiCamera::requestFinished);
 
     initialize();
 }
 
-void Camera::initialize()
+void OiCamera::initialize()
 {
     switchCamMode(MODE_PLAY);
     //completePendingRequests();
@@ -37,7 +38,7 @@ void Camera::initialize()
     completePendingRequests();
 }
 
-bool Camera::isOnline()
+bool OiCamera::isOnline()
 {
     QTcpSocket socket;
     socket.connectToHost(camAddress, 80, QIODevice::ReadOnly);
@@ -46,7 +47,7 @@ bool Camera::isOnline()
 
 /********* Request handling ***********/
 
-QNetworkRequest Camera::makeRequest(QString cgi, QMap<QString, QString> params)
+QNetworkRequest OiCamera::makeRequest(QString cgi, QMap<QString, QString> params)
 {
     QString tpl = QString("http://%1/%2.cgi").arg(camAddress.toString()).arg(cgi);
 
@@ -66,7 +67,7 @@ QNetworkRequest Camera::makeRequest(QString cgi, QMap<QString, QString> params)
     return request;
 }
 
-QNetworkReply * Camera::get(QString cgi, QMap<QString, QString> params)
+QNetworkReply * OiCamera::get(QString cgi, QMap<QString, QString> params)
 {
     QNetworkRequest request = makeRequest(cgi, params);
     QNetworkReply *reply = networkManager->get(request);
@@ -77,7 +78,7 @@ QNetworkReply * Camera::get(QString cgi, QMap<QString, QString> params)
     return reply;
 }
 
-QNetworkReply * Camera::post(QString cgi, QMap<QString, QString> params, QDomDocument body)
+QNetworkReply * OiCamera::post(QString cgi, QMap<QString, QString> params, QDomDocument body)
 {
     QNetworkRequest request = makeRequest(cgi, params);
     QNetworkReply *reply = networkManager->post(request, body.toByteArray());
@@ -88,7 +89,7 @@ QNetworkReply * Camera::post(QString cgi, QMap<QString, QString> params, QDomDoc
     return reply;
 }
 
-void Camera::completePendingRequests()
+void OiCamera::completePendingRequests()
 {
     static QEventLoop loop;
 
@@ -100,7 +101,7 @@ void Camera::completePendingRequests()
     }
 }
 
-void Camera::requestFinished(QNetworkReply *reply)
+void OiCamera::requestFinished(QNetworkReply *reply)
 {
     QDomDocument xml;
 
@@ -140,32 +141,32 @@ void Camera::requestFinished(QNetworkReply *reply)
 
 /********* Actions ***********/
 
-void Camera::controlZoom(ZoomMode cmd)
+void OiCamera::controlZoom(ZoomMode cmd)
 {
     // FIXME implement
 }
 
-void Camera::setTimeDiff(QDateTime t)
+void OiCamera::setTimeDiff(QDateTime t)
 {
     // FIXME implement
 }
 
-void Camera::reFocus(QPoint pos, QSize size)
+void OiCamera::reFocus(QPoint pos, QSize size)
 {
     // FIXME implement
 }
 
 /********* Requests **********/
 
-void Camera::takeShot()                 { get("exec_takemotion"); }
-void Camera::powerOff()                 { get("exec_pwoff"); }
+void OiCamera::takeShot()                 { get("exec_takemotion"); }
+void OiCamera::powerOff()                 { get("exec_pwoff"); }
 
-void Camera::requestCamInfo()           { get("get_caminfo"); }
-void Camera::requestCapacity()          { get("get_unusedcapacity"); }
-void Camera::requestConnectMode()       { get("get_connectmode"); }
-void Camera::requestCommandList()       { get("get_commandlist"); }
+void OiCamera::requestCamInfo()           { get("get_caminfo"); }
+void OiCamera::requestCapacity()          { get("get_unusedcapacity"); }
+void OiCamera::requestConnectMode()       { get("get_connectmode"); }
+void OiCamera::requestCommandList()       { get("get_commandlist"); }
 
-void Camera::requestImageList(QString dir, bool rsv) {
+void OiCamera::requestImageList(QString dir, bool rsv) {
     QMap<QString, QString> params;
 
     params["DIR"] = dir.replace('/', "%2F");
@@ -173,7 +174,7 @@ void Camera::requestImageList(QString dir, bool rsv) {
     get(rsv ? "get_rsvimglist" : "get_imglist", params);
 }
 
-void Camera::requestImage(QString name, QSize resolution)
+void OiCamera::requestImage(QString name, QSize resolution)
 {
     QString tpl = QString("http://%1/DCIM/100OLYMP/%1.JPG").arg(camAddress.toString()).arg(name);
     QUrl url(tpl);
@@ -182,7 +183,7 @@ void Camera::requestImage(QString name, QSize resolution)
     networkManager->get(request);
 }
 
-void Camera::switchCamMode(CamMode mode)
+void OiCamera::switchCamMode(CamMode mode)
 {
     QMap<QString, QString> params;
 
@@ -204,7 +205,7 @@ void Camera::switchCamMode(CamMode mode)
 
 /*********** Reply parsers ************/
 
-void Camera::parseXml(QString cgi, QDomDocument body)
+void OiCamera::parseXml(QString cgi, QDomDocument body)
 {
     if      (cgi == "get_unusedcapacity") parseCapacity(body);
     else if (cgi == "get_commandlist")    parseCommandList(body);
@@ -226,19 +227,19 @@ void OiCamera::parseList(QString cgi, QByteArray body)
     }
 }
 
-void Camera::parseImage(QString cgi, QByteArray body)
+void OiCamera::parseImage(QString cgi, QByteArray body)
 {
     QImage img = QImage::fromData(body.data());
 
     emit receivedImage(img);
 }
 
-void Camera::parseEmpty(QString cgi)
+void OiCamera::parseEmpty(QString cgi)
 {
     // FIXME anything to do here?
 }
 
-void Camera::parseCamInfo(QDomDocument body)
+void OiCamera::parseCamInfo(QDomDocument body)
 {
     QDomElement elm = body.firstChildElement("caminfo");
     if (!elm.isNull()) {
@@ -247,19 +248,19 @@ void Camera::parseCamInfo(QDomDocument body)
     }
 }
 
-void Camera::parseCapacity(QDomDocument body)
+void OiCamera::parseCapacity(QDomDocument body)
 {
     QDomElement elm = body.firstChildElement("unused");
     if (!elm.isNull())
         unusedCapacity = elm.text().toInt();
 }
 
-void Camera::parseCommandList(QDomDocument body)
+void OiCamera::parseCommandList(QDomDocument body)
 {
     commandList = body;
 }
 
-void Camera::parseConnectMode(QDomDocument body)
+void OiCamera::parseConnectMode(QDomDocument body)
 {
     QDomElement elm = body.firstChildElement("connectmode");
     if (!elm.isNull()) {
@@ -273,17 +274,17 @@ void Camera::parseConnectMode(QDomDocument body)
 
 }
 
-void Camera::parseProperties(QDomDocument body)
+void OiCamera::parseProperties(QDomDocument body)
 {
 
 }
 
-void Camera::parseTakeMisc(QDomDocument body)
+void OiCamera::parseTakeMisc(QDomDocument body)
 {
 
 }
 
-void Camera::parseTakeMotion(QDomDocument body)
+void OiCamera::parseTakeMotion(QDomDocument body)
 {
 
 }

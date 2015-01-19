@@ -1,3 +1,4 @@
 build-*
-*,pro.user
-libqt-omd.pro.user
+*.pro.user
+*.creator
+*.creator.user
