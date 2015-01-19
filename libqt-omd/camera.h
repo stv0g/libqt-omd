@@ -125,8 +125,7 @@ protected:
     QList<QSize>        liveViewResolutions;
     QList<QSize>        resizeResolutions;
 
-    QList<QString>      imageList;
-    QList<QString>      reservedImageList;
+    QHash<QString, OiImage> images;
 
     /* Constants */
     static const QString userAgent;

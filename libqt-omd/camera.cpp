@@ -7,6 +7,7 @@
 #include <QNetworkRequest>
 #include <QEventLoop>
 
+#include "image.h"
 #include "camera.h"
 
 const QString Camera::userAgent = "libqt-omd v0.1";
@@ -214,14 +215,14 @@ void Camera::parseXml(QString cgi, QDomDocument body)
     else if (cgi == "exec_takemisc")      parseTakeMisc(body);
 }
 
-void Camera::parseList(QString cgi, QByteArray body)
+void OiCamera::parseList(QString cgi, QByteArray body)
 {
-    QList<QString> *list;
-    if      (cgi == "get_imglist")        list = &imageList;
-    else if (cgi == "get_rsvimglist")     list = &reservedImageList;
+    bool mark = (cgi == "get_rsvimglist");
 
     for (QByteArray line : body.split('\n')) {
-        qDebug() << line;
+        OiImage img(line, mark, this);
+
+        images[img.path()] = img;
     }
 }
 
