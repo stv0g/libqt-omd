@@ -11,9 +11,22 @@ The library is based on Qt4 / Qt5 and implements two classes:
 
 ## Compatible Cameras
 
-  - Olympus OM-D E-M5
-  - Olympus OM-D E-M10
-  - and most of the cameras which are compatible with [Olympus Image Share](http://app.olympus-imaging.com/oishare/).
+The following Olympus cameras are compatible with libqt-omd.
+These are all cameras which are compatible with [Olympus Image Share](http://app.olympus-imaging.com/oishare/).
+
+  - OM-D E-M1
+  - OM-D E-M10
+  - PEN E-P5
+  - STYLUS 1
+  - TG-3
+  - SH-1
+
+### Compatible motor zoom lenses
+
+  - M.ZUIKO 12-50mm f3.5-5.6 EZ
+  - M.ZUIKO 14-42mm f3.5-5.6 EZ
+
+Source: http://www.getolympus.com/olympusimageshare
 
 ## License
 
