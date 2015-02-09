@@ -25,3 +25,6 @@ INCLUDEPATH += $$PWD/../libqt-omd
 DEPENDPATH += $$PWD/../libqt-omd
 
 CONFIG += c++11
+
+RESOURCES += \
+    images.qrc
