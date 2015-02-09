@@ -19,10 +19,10 @@ class Oi::LiveView
         void stop();
 
     protected:
-        int          port = 48482;
-        QUdpSocket   socket;
+        int          mPort = 48482;
+        QUdpSocket   mSocket;
 
-        Camera *cam;
+        Camera *mCam;
 };
 
 #endif // LIVEVIEW_H

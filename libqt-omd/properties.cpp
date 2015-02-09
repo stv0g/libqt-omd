@@ -11,7 +11,7 @@ Properties::Properties(QDomNode desclist)
         Property prop(desc);
 
         if (prop.isValid())
-            properties[prop.key] = prop;
+            mProperties[prop.mKey] = prop;
 
         desc = desc.nextSibling();
     }
@@ -19,24 +19,24 @@ Properties::Properties(QDomNode desclist)
 
 Property::Property(QDomNode desc)
 {
-    key   = desc.firstChildElement("propname").text();
-    value = desc.firstChildElement("value").text();
-    valid = desc.firstChildElement("enum").text().split(' ');
+    mKey   = desc.firstChildElement("propname").text();
+    mValue = desc.firstChildElement("value").text();
+    mValid = desc.firstChildElement("enum").text().split(' ');
 
     QString attr = desc.firstChildElement("attribute").text();
     if (attr.contains("set"))
-        flags |= PROP_SETABLE;
+        mFlags |= PROP_SETABLE;
     if (attr.contains("get"))
-        flags |= PROP_GETABLE;
-    if (valid.contains(value))
-        flags |= PROP_VALID;
+        mFlags |= PROP_GETABLE;
+    if (mValid.contains(mValue))
+        mFlags |= PROP_VALID;
 }
 
 Property & Property::operator =(const QString &newValue)
 {
-    if (valid.contains(newValue)) {
-        value = newValue;
-        flags |= PROP_CHANGED;
+    if (mValid.contains(newValue)) {
+        mValue = newValue;
+        mFlags |= PROP_CHANGED;
     }
 
     return *this;
@@ -44,5 +44,5 @@ Property & Property::operator =(const QString &newValue)
 
 bool Property::isValid(QString check)
 {
-   return valid.contains(check.isEmpty() ? value : check);
+   return mValid.contains(check.isEmpty() ? mValue : check);
 }

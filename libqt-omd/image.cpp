@@ -8,12 +8,26 @@ using namespace Oi;
 Image::Image() :
     mCam(NULL)
 { }
-{
-    QByteArrayList fields = line.split(',');
 
-    path       = QString(fields[0]).append(fields[1]);
-    size       = fields[2].toInt();
-    attributes = fields[3].toInt();
+Image::Image(const Image &img) :
+    mCam(img.mCam),
+    mPixels(img.mPixels),
+    mPath(img.mPath),
+    mDate(img.mDate),
+    mAttributes(img.mAttributes),
+    mSize(img.mSize),
+    mMarked(img.mMarked)
+{ }
+
+Image::Image(QString line, bool marked, Camera *c) :
+    mCam(c),
+    mMarked(marked)
+{
+    QStringList fields = line.split(',');
+
+    mPath       = QString("%1/%2").arg(fields[0]).arg(fields[1]);
+    mSize       = fields[2].toInt();
+    mAttributes = fields[3].toInt();
 
     decodeDateTime(
         fields[4].toInt(),
@@ -37,7 +51,7 @@ void Image::decodeDateTime(int dat, int tim)
     int sec    = BITS(tim, 2, 4);
     int msec   = BITS(tim, 0, 1) * 500;
 
-    date = QDateTime(
+    mDate = QDateTime(
         QDate(year, month, day),
         QTime(hour, minute, sec, msec)
     );
@@ -45,50 +59,50 @@ void Image::decodeDateTime(int dat, int tim)
 
 void Image::load()
 {
-    cam->requestImage(path);
+    mCam->requestImage(mPath);
 }
 
 /* Getter */
 
 QString Image::path() const
 {
-    return path;
+    return mPath;
 }
 
 QDateTime Image::dateTime() const
 {
-    return date;
+    return mDate;
 }
 
 int Image::attributes() const
 {
-    return attributes;
+    return mAttributes;
 }
 
 int  Image::size() const
 {
-    return size;
+    return mSize;
 }
 
 bool Image::marked() const
 {
-    return marked;
+    return mMarked;
 }
 
 /* Setter */
 void Image::setMarked(bool mark)
 {
-    marked = m;
+    mMarked = mark;
 }
 
 /* Operators */
 bool Image::operator ==(const Image &b)
 {
     return (
-        ( b.path == path ) &&
-        ( b.size == size ) &&
-        ( b.attributes == attributes) &&
-        ( b.date == date )
+        ( b.mPath == mPath ) &&
+        ( b.mSize == mSize ) &&
+        ( b.mAttributes == mAttributes) &&
+        ( b.mDate == mDate )
     );
 }
 

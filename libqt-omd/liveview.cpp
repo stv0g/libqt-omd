@@ -3,5 +3,5 @@
 using namespace Oi;
 
 LiveView::LiveView(Camera *c) :
-    cam(c)
+    mCam(c)
 { }

@@ -50,7 +50,7 @@ void Camera::initialize()
 bool Camera::isOnline()
 {
     QTcpSocket socket;
-    socket.connectToHost(camAddress, 80, QIODevice::ReadOnly);
+    socket.connectToHost(mAddress, 80, QIODevice::ReadOnly);
     return socket.waitForConnected(2000);
 }
 
@@ -58,7 +58,7 @@ bool Camera::isOnline()
 
 QNetworkRequest Camera::makeRequest(QString cgi, QMap<QString, QString> params)
 {
-    QString tpl = QString("http://%1/%2.cgi").arg(camAddress.toString()).arg(cgi);
+    QString tpl = QString("http://%1/%2.cgi").arg(mAddress.toString()).arg(cgi);
 
     QUrl url(tpl);
     QUrlQuery query(url);
@@ -71,7 +71,7 @@ QNetworkRequest Camera::makeRequest(QString cgi, QMap<QString, QString> params)
     url.setQuery(query);
 
     QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::UserAgentHeader, userAgent);
+    request.setHeader(QNetworkRequest::UserAgentHeader, cUserAgent);
 
     return request;
 }
@@ -79,22 +79,22 @@ QNetworkRequest Camera::makeRequest(QString cgi, QMap<QString, QString> params)
 QNetworkReply * Camera::get(QString cgi, QMap<QString, QString> params)
 {
     QNetworkRequest request = makeRequest(cgi, params);
-    QNetworkReply *reply = networkManager->get(request);
+    QNetworkReply *reply = mNetworkManager.get(request);
 
     qDebug() << "[libqt-omd] New GET request:" << request.url();
 
-    pendingReplies.append(reply);
+    mPendingReplies.append(reply);
     return reply;
 }
 
 QNetworkReply * Camera::post(QString cgi, QMap<QString, QString> params, QDomDocument body)
 {
     QNetworkRequest request = makeRequest(cgi, params);
-    QNetworkReply *reply = networkManager->post(request, body.toByteArray());
+    QNetworkReply *reply = mNetworkManager.post(request, body.toByteArray());
 
     qDebug() << "[libqt-omd] New POST request:" << request.url();
 
-    pendingReplies.append(reply);
+    mPendingReplies.append(reply);
     return reply;
 }
 
@@ -112,8 +112,6 @@ void Camera::completePendingRequests()
 
 void Camera::requestFinished(QNetworkReply *reply)
 {
-    QDomDocument xml;
-
     qDebug() << "[libqt-omd] Request finished:" << reply->url();
 
     if (reply->error() == QNetworkReply::NoError) {
@@ -145,7 +143,7 @@ void Camera::requestFinished(QNetworkReply *reply)
     else
        qWarning() << "Request failed: " << reply->errorString();
 
-    pendingReplies.removeAll(reply);
+    mPendingReplies.removeAll(reply);
 }
 
 /********* Actions ***********/
@@ -189,13 +187,13 @@ void Camera::requestImageList(QString dir, bool rsv) {
 
 void Camera::requestImage(QString name, QSize resolution)
 {
-    QString tpl = QString("http://%1/DCIM/100OLYMP/%1.JPG").arg(camAddress.toString()).arg(name);
     Q_UNUSED(resolution)
 
+    QString tpl = QString("http://%1/DCIM/100OLYMP/%1.JPG").arg(mAddress.toString()).arg(name);
     QUrl url(tpl);
     QNetworkRequest request(url);
 
-    networkManager->get(request);
+    mNetworkManager.get(request);
 }
 
 void Camera::switchCamMode(CamMode mode)
@@ -265,7 +263,9 @@ void Camera::parseCamInfo(QDomDocument body)
     QDomElement elm = body.firstChildElement("caminfo");
     if (!elm.isNull()) {
         QDomElement model = elm.firstChildElement("model");
-        camModel = model.text();
+        mCamModel = model.text();
+
+        emit modelUpdated(mCamModel);
     }
 }
 
@@ -278,7 +278,7 @@ void Camera::parseCapacity(QDomDocument body)
 
 void Camera::parseCommandList(QDomDocument body)
 {
-    commandList = body;
+    mCommandList = body;
 }
 
 void Camera::parseConnectMode(QDomDocument body)
@@ -286,9 +286,9 @@ void Camera::parseConnectMode(QDomDocument body)
     QDomElement elm = body.firstChildElement("connectmode");
     if (!elm.isNull()) {
         if (elm.text() == "private")
-            connectMode = CONNECT_PRIVATE;
+            mConnectMode = CONNECT_PRIVATE;
         else if (elm.text() == "shared")
-            connectMode = CONNECT_SHARED;
+            mConnectMode = CONNECT_SHARED;
         else
             qWarning() << "[libqt-omd] Warning: unknown connectMode:" << elm.text();
     }

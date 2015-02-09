@@ -20,9 +20,9 @@ public:
     Oi::Property& operator[](const QString &key);
 
 protected:
-    Oi::Camera *cam;
+    Oi::Camera *mCam;
 
-    QMap<QString, Oi::Property> properties;
+    QMap<QString, Oi::Property> mProperties;
 };
 
 class Oi::Property
@@ -48,12 +48,12 @@ public:
 protected:
     Property(QDomNode desc);
 
-    QStringList valid;
+    QStringList mValid;
 
-    int flags;
+    int mFlags;
 
-    QString key;
-    QString value;
+    QString mKey;
+    QString mValue;
 };
 
 #endif // PROPERTIES_H

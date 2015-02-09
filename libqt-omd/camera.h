@@ -47,93 +47,95 @@ public:
 
     Camera();
 
-    void                setProperty(QString key, QString value);
-    QString             getProperty(QString key);
+    void                    setProperty(QString key, QString value);
+    QString                 getProperty(QString key);
 
     /* Asynchronous requests */;
-    void                requestCamInfo();
-    void                requestCapacity();
-    void                requestConnectMode();
-    void                requestCommandList();
-    void                requestImageList(QString dir = "/DCIM/100OLYMP", bool reserved = false);
-    void                requestImage(QString name = QString(), QSize resolution = QSize(-1, -1));
+    void                    requestCamInfo();
+    void                    requestCapacity();
+    void                    requestConnectMode();
+    void                    requestCommandList();
+    void                    requestImageList(QString dir = "/DCIM/100OLYMP", bool reserved = false);
+    void                    requestImage(QString name = QString(), QSize resolution = QSize(-1, -1));
 
     /* Synchronous getters */
-    QString             getCamInfo();
-    int                 getCapacity();
-    enum ConnectMode    getConnectMode();
-    void /* FIXME */    getCommandList();
-    QList<QString>      getImageList(bool reserved = false);
-    QImage              getImage(QString name = QString(), QSize resolution = QSize());
+    QString                 getCamInfo();
+    unsigned                getCapacity();
+    enum ConnectMode        getConnectMode();
+    void /* FIXME */        getCommandList();
+    QList<QString>          getImageList(bool reserved = false);
+    QImage                  getImage(QString name = QString(), QSize resolution = QSize());
 
-    LiveView *          startLiveView(QSize resolution = QSize(640, 480), int port = 22222);
-    void                stopLiveView();
+    Oi::LiveView *          startLiveView(QSize resolution = QSize(640, 480), int port = 22222);
+    void                    stopLiveView();
 
     /* Cached getters */
-    bool                isOnline();
-    enum CamMode        getCamMode();
+    bool                    isOnline();
+    enum CamMode            camMode();
 
 public slots:
-    void                switchCamMode(enum CamMode mode);
-    void                controlZoom(enum ZoomMode cmd);
-    void                takeShot();
-    void                reFocus(QPoint pos, QSize size);
-    void                powerOff();
-    void                setTimeDiff(QDateTime t);
+    void                    switchCamMode(enum CamMode mode);
+    void                    controlZoom(enum ZoomMode cmd);
+    void                    takeShot();
+    void                    reFocus(QPoint pos, QSize size);
+    void                    powerOff();
+    void                    setTimeDiff(QDateTime t);
 
 signals:
-    void                receivedImage(QImage);
-    void                changedProperty(QString key, QString value);
-    void                changedMode(enum CamMode);
-    void                connected(enum ConnectMode);
+    void                    receivedImage(QImage);
+    void                    capacityUpdated(long unsigned);
+    void                    changedProperty(QString key, QString value);
+    void                    changedMode(enum CamMode);
+    void                    modelUpdated(QString);
+    void                    poweredOff();
+    void                    connected(enum ConnectMode);
 
 protected slots:
-    void                requestFinished(QNetworkReply *);
+    void                    requestFinished(QNetworkReply *);
 
 protected:
     /* Network requests */
-    QNetworkRequest     makeRequest(QString cgi, QMap<QString, QString> params);
-    QNetworkReply *             get(QString cgi, QMap<QString, QString> params = QMap<QString, QString>());
-    QNetworkReply *            post(QString cgi, QMap<QString, QString> params = QMap<QString, QString>(), QDomDocument body = QDomDocument());
+    QNetworkRequest  makeRequest(QString cgi, QMap<QString, QString> params);
+    QNetworkReply *          get(QString cgi, QMap<QString, QString> params = QMap<QString, QString>());
+    QNetworkReply *         post(QString cgi, QMap<QString, QString> params = QMap<QString, QString>(), QDomDocument body = QDomDocument());
 
     /* Parsers */
-    void                parseEmpty(QString cgi);
-    void                parseXml(QString cgi, QDomDocument body);
-    void                parseList(QString cgi, QByteArray body);
-    void                parseImage(QString cgi, QByteArray body);
+    void                    parseEmpty(QString cgi, QNetworkReply *reply = NULL);
+    void                    parseXml(QString cgi, QDomDocument body);
+    void                    parseList(QString cgi, QByteArray body);
+    void                    parseImage(QString cgi, QByteArray body);
 
-    void                parseCamInfo(QDomDocument body);
-    void                parseCapacity(QDomDocument body);
-    void                parseConnectMode(QDomDocument body);
-    void                parseCommandList(QDomDocument body);
-    void                parseProperties(QDomDocument body);
-    void                parseTakeMotion(QDomDocument body);
-    void                parseTakeMisc(QDomDocument body);
+    void                    parseCamInfo(QDomDocument body);
+    void                    parseCapacity(QDomDocument body);
+    void                    parseConnectMode(QDomDocument body);
+    void                    parseCommandList(QDomDocument body);
+    void                    parseProperties(QDomDocument body);
+    void                    parseTakeMotion(QDomDocument body);
+    void                    parseTakeMisc(QDomDocument body);
 
     /* Helpers */
-    void                completePendingRequests();
-    void                initialize();
+    void                    completePendingRequests();
+    void                    initialize();
 
     /* Members */
-    QHostAddress                camAddress;
-    QList<QNetworkReply *>      pendingReplies;
-    QNetworkAccessManager *     networkManager;
+    QHostAddress            mAddress;
+    QEventLoop              mLoop;
+    QList<QNetworkReply *>  mPendingReplies;
+    QNetworkAccessManager   mNetworkManager;
 
     /* Properties */
-    enum CamMode        camMode;
-    enum ConnectMode    connectMode;
+    enum CamMode            mCamMode;
+    enum ConnectMode        mConnectMode;
 
-    QString             camModel;
-    int                 unusedCapacity;
+    QString                 mCamModel;
+    long unsigned           mUnusedCapacity;
 
-    QDomDocument        commandList;
-    QList<QSize>        liveViewResolutions;
-    QList<QSize>        resizeResolutions;
+    QDomDocument            mCommandList;
 
-    QHash<QString, OiImage> images;
+    QHash<QString, Image> mImages;
 
     /* Constants */
-    static const QString userAgent;
+    static const QString    cUserAgent;
 };
 
 #endif // CAMERA_H
