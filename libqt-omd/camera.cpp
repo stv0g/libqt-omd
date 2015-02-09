@@ -21,7 +21,10 @@ Camera::Camera() :
 {
     connect(&mNetworkManager, &QNetworkAccessManager::finished, this, &Camera::requestFinished);
 
-    initialize();
+    if (isOnline())
+        initialize();
+    else
+        qWarning() << "[libqt-omd] Camera is not online";
 }
 
 void Camera::initialize()
@@ -33,10 +36,15 @@ void Camera::initialize()
     requestCapacity();
     requestConnectMode();
     requestCommandList();
-
     requestImageList();
 
     completePendingRequests();
+
+    qDebug() << "[libqt-omd] CamModel: " << mCamModel;
+    qDebug() << "[libqt-omd] UnusedCapacity: " << mUnusedCapacity;
+    qDebug() << "[libqt-omd] CamMode: " << mCamMode;
+    qDebug() << "[libqt-omd] ConnectMode: " << mConnectMode;
+
 }
 
 bool Camera::isOnline()
@@ -214,6 +222,8 @@ void Camera::switchCamMode(CamMode mode)
 
 void Camera::parseXml(QString cgi, QDomDocument body)
 {
+    qDebug() << "[libqt-omd] Parsing XML for:" << cgi;
+
     if      (cgi == "get_unusedcapacity") parseCapacity(body);
     else if (cgi == "get_commandlist")    parseCommandList(body);
     else if (cgi == "get_camprop")        parseProperties(body);
@@ -231,6 +241,8 @@ void Camera::parseList(QString cgi, QByteArray body)
         OiImage img(line, mark, this);
 
         images[img.path()] = img;
+    qDebug() << "[libqt-omd] Version Header:" << header;
+
     }
 }
 
