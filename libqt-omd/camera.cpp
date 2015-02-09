@@ -30,7 +30,7 @@ Camera::Camera() :
 void Camera::initialize()
 {
     switchCamMode(MODE_PLAY);
-    //completePendingRequests();
+    completePendingRequests();
 
     requestCamInfo();
     requestCapacity();
@@ -100,14 +100,8 @@ QNetworkReply * Camera::post(QString cgi, QMap<QString, QString> params, QDomDoc
 
 void Camera::completePendingRequests()
 {
-    static QEventLoop loop;
-
-    connect(networkManager, &QNetworkAccessManager::finished, &loop, &QEventLoop::wakeUp);
-
-    while (!pendingReplies.empty()) {
-        qDebug() << "[libqt-omd] Entering event loop!";
-        loop.exec();
-    }
+    while (!mPendingReplies.empty())
+        mLoop.exec();
 }
 
 void Camera::requestFinished(QNetworkReply *reply)
@@ -144,6 +138,7 @@ void Camera::requestFinished(QNetworkReply *reply)
        qWarning() << "Request failed: " << reply->errorString();
 
     mPendingReplies.removeAll(reply);
+    mLoop.exit();
 }
 
 /********* Actions ***********/
