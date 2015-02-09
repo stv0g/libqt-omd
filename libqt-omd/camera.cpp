@@ -144,16 +144,20 @@ void Camera::requestFinished(QNetworkReply *reply)
 
 void Camera::controlZoom(ZoomMode cmd)
 {
+    Q_UNUSED(cmd)
     // FIXME implement
 }
 
 void Camera::setTimeDiff(QDateTime t)
 {
+    Q_UNUSED(t)
     // FIXME implement
 }
 
 void Camera::reFocus(QPoint pos, QSize size)
 {
+    Q_UNUSED(pos)
+    Q_UNUSED(size)
     // FIXME implement
 }
 
@@ -178,6 +182,8 @@ void Camera::requestImageList(QString dir, bool rsv) {
 void Camera::requestImage(QString name, QSize resolution)
 {
     QString tpl = QString("http://%1/DCIM/100OLYMP/%1.JPG").arg(camAddress.toString()).arg(name);
+    Q_UNUSED(resolution)
+
     QUrl url(tpl);
     QNetworkRequest request(url);
 
@@ -230,6 +236,8 @@ void Camera::parseList(QString cgi, QByteArray body)
 
 void Camera::parseImage(QString cgi, QByteArray body)
 {
+    Q_UNUSED(cgi)
+
     QImage img = QImage::fromData(body.data());
 
     emit receivedImage(img);
@@ -277,15 +285,18 @@ void Camera::parseConnectMode(QDomDocument body)
 
 void Camera::parseProperties(QDomDocument body)
 {
-
+    Q_UNUSED(body)
+    // FIXME implement
 }
 
 void Camera::parseTakeMisc(QDomDocument body)
 {
-
+    Q_UNUSED(body)
+    // FIXME implement
 }
 
 void Camera::parseTakeMotion(QDomDocument body)
 {
-
+    Q_UNUSED(body)
+    // FIXME implement
 }
