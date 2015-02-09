@@ -27,12 +27,14 @@ class Oi::Camera : public QObject
 public:
     /* Enums */
     enum CamMode {
+        MODE_UNKNOWN,
         MODE_RECORD,
         MODE_PLAY,
         MODE_SHUTTER
     };
 
     enum ConnectMode {
+        CONNECT_UNKNOWN,
         CONNECT_PRIVATE,
         CONNECT_SHARED
     };

@@ -206,6 +206,9 @@ void Camera::switchCamMode(CamMode mode)
         case MODE_SHUTTER:
             params["mode"] = "shutter";
             break;
+        case MODE_UNKNOWN:
+        default:
+            return;
     }
 
     get("switch_cammode", params);
