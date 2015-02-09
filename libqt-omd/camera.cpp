@@ -126,8 +126,8 @@ void Camera::requestFinished(QNetworkReply *reply)
         else if (contentType == "text/plain"  && reply->size() > 0)
             parseList(cgi, reply->readAll());
         else if (contentType == "www/unknown" && reply->size() == 0)
-            parseEmpty(cgi);
-        else if (contentType == "image/jpeg")
+            parseEmpty(cgi, reply);
+        else if (contentType == "image/jpeg"  && reply->size() > 0)
             parseImage(cgi, reply->readAll());
         else
             qCritical() << "Failed to parse reply: Content-Type = " << contentType
@@ -211,7 +211,8 @@ void Camera::switchCamMode(CamMode mode)
             return;
     }
 
-    get("switch_cammode", params);
+    QNetworkReply *reply = get("switch_cammode", params);
+    reply->setProperty("camMode", QVariant(mode));
 }
 
 /*********** Reply parsers ************/
@@ -233,12 +234,16 @@ void Camera::parseList(QString cgi, QByteArray body)
 {
     bool mark = (cgi == "get_rsvimglist");
 
-    for (QByteArray line : body.split('\n')) {
-        OiImage img(line, mark, this);
+    QStringList lines = QString(body).split("\r\n");
+    QString header = lines.takeFirst();
 
-        images[img.path()] = img;
     qDebug() << "[libqt-omd] Version Header:" << header;
 
+    for (QString line : lines) {
+        if (line.size()) {
+            Image img(line, mark, this);
+            mImages.insert(img.path(), img);
+        }
     }
 }
 
@@ -253,7 +258,12 @@ void Camera::parseImage(QString cgi, QByteArray body)
 
 void Camera::parseEmpty(QString cgi, QNetworkReply *reply)
 {
-    // FIXME anything to do here?
+    if (cgi == "switch_cammode") {
+        mCamMode = static_cast<CamMode>(reply->property("camMode").toInt());
+        emit changedMode(mCamMode);
+    }
+    else if (cgi == "exec_pwoff")
+        emit poweredOff();
 }
 
 void Camera::parseCamInfo(QDomDocument body)
@@ -270,8 +280,11 @@ void Camera::parseCamInfo(QDomDocument body)
 void Camera::parseCapacity(QDomDocument body)
 {
     QDomElement elm = body.firstChildElement("unused");
-    if (!elm.isNull())
-        unusedCapacity = elm.text().toInt();
+    if (!elm.isNull()) {
+        mUnusedCapacity = elm.text().toUInt();
+
+        emit capacityUpdated(mUnusedCapacity);
+    }
 }
 
 void Camera::parseCommandList(QDomDocument body)
