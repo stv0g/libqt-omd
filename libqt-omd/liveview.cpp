@@ -1,5 +1,7 @@
 #include "liveview.h"
 
-LiveView::LiveView()
-{
-}
+using namespace Oi;
+
+LiveView::LiveView(Camera *c) :
+    cam(c)
+{ }

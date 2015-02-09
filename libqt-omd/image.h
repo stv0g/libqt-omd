@@ -5,9 +5,13 @@
 #include <QByteArray>
 #include <QDateTime>
 
-class OiCamera;
 
-class OiImage : public QImage
+namespace Oi {
+    class Camera;
+    class Image;
+}
+
+class Oi::Image : public QImage
 {
     Q_PROPERTY(QString path READ path)
     Q_PROPERTY(QDateTime date READ dateTime)
@@ -16,9 +20,11 @@ class OiImage : public QImage
     Q_PROPERTY(bool marked READ marked WRITE setMarked)
 
     public:
-        OiImage(QByteArray line, bool marked = false, OiCamera *cam = NULL);
+        Image();
+        Image(const Image &img);
+        Image(QString line, bool marked = false, Oi::Camera *cam = NULL);
 
-        ~OiImage();
+        ~Image();
 
         void load();
 
@@ -34,22 +40,21 @@ class OiImage : public QImage
 
         /* Operators */
 
-        bool operator ==(const OiImage &);
+        bool operator ==(const Image &);
 
     protected:
         void decodeDateTime(int dat, int tim);
 
-        OiCamera *cam;
+        Oi::Camera *mCam;
 
-        QImage data;
-        QImage thumbnail;
+        QMap<QSize, QImage> mPixels;
 
-        QString path;
-        QDateTime date;
+        QString mPath;
+        QDateTime mDate;
 
-        int attributes;
-        int size;
-        bool marked;
+        int mAttributes;
+        int mSize;
+        bool mMarked;
 };
 
 #endif // IMAGE_H

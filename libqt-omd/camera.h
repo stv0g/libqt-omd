@@ -5,14 +5,21 @@
 #include <QImage>
 #include <QDateTime>
 #include <QtXml/QDomDocument>
+#include <QNetworkAccessManager>
+#include <QEventLoop>
 
-#include "liveview.h"
-
+#include "properties.h"
+#include "image.h"
 class QNetworkAccessManager;
 class QNetworkReply;
 class QNetworkRequest;
 
-class OiCamera : public QObject
+namespace Oi {
+    class LiveView;
+    class Camera;
+}
+
+class Oi::Camera : public QObject
 {
     Q_OBJECT
     // FIXME add Q_PROPERTY's
@@ -38,7 +45,7 @@ public:
         ZOOM_TELETERM
     };
 
-    OiCamera();
+    Camera();
 
     void                setProperty(QString key, QString value);
     QString             getProperty(QString key);

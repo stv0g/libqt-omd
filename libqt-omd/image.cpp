@@ -1,10 +1,13 @@
 #include "camera.h"
 #include "image.h"
 
+using namespace Oi;
+
 #define BITS(x, from, to) ((x >> 9) & ((1 << (to - from)) - 1))
 
-OiImage::OiImage(QByteArray line, OiCamera *c) :
-    cam(c)
+Image::Image() :
+    mCam(NULL)
+{ }
 {
     QByteArrayList fields = line.split(',');
 
@@ -18,12 +21,12 @@ OiImage::OiImage(QByteArray line, OiCamera *c) :
     );
 }
 
-OiImage::~OiImage()
+Image::~Image()
 {
 
 }
 
-void OiImage::decodeDateTime(int dat, int tim)
+void Image::decodeDateTime(int dat, int tim)
 {
     int year   = BITS(dat, 9, 15) + 1980;
     int month  = BITS(dat, 5, 8);
@@ -40,46 +43,46 @@ void OiImage::decodeDateTime(int dat, int tim)
     );
 }
 
-void OiImage::load()
+void Image::load()
 {
     cam->requestImage(path);
 }
 
 /* Getter */
 
-QString OiImage::path() const
+QString Image::path() const
 {
     return path;
 }
 
-QDateTime OiImage::date() const
+QDateTime Image::dateTime() const
 {
     return date;
 }
 
-int OiImage::attributes() const
+int Image::attributes() const
 {
     return attributes;
 }
 
-int  OiImage::size() const
+int  Image::size() const
 {
     return size;
 }
 
-bool OiImage::marked() const
+bool Image::marked() const
 {
     return marked;
 }
 
 /* Setter */
-void OiImage::setMarked(bool mark)
+void Image::setMarked(bool mark)
 {
     marked = m;
 }
 
 /* Operators */
-bool OiImage::operator ==(const OiImage &b)
+bool Image::operator ==(const Image &b)
 {
     return (
         ( b.path == path ) &&

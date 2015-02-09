@@ -5,25 +5,29 @@
 #include <QStringList>
 
 #include "camera.h"
+#include "image.h"
 
-class OiProperty;
+namespace Oi {
+    class Property;
+    class Properties;
+}
 
-class OiProperties
+class Oi::Properties
 {
 public:
-    OiProperties(QDomNode desclist);
+    Properties(QDomNode desclist);
 
-    OiProperty& operator[](const QString &key);
+    Oi::Property& operator[](const QString &key);
 
 protected:
-    OiCamera *cam;
+    Oi::Camera *cam;
 
-    QMap<QString, OiProperty> properties;
+    QMap<QString, Oi::Property> properties;
 };
 
-class OiProperty
+class Oi::Property
 {
-    friend class OiProperties;
+    friend class Oi::Properties;
 
     enum {
         PROP_VALID      = 1,
@@ -33,16 +37,16 @@ class OiProperty
     };
 
 public:
-    OiProperty() { }
-    OiProperty(QDomElement desc);
+    Property() { }
+    Property(QDomElement desc);
 
-    OiProperty& operator =(const QString &value);
+    Property& operator =(const QString &value);
     operator QString();
 
     bool isValid(QString value = QString());
 
 protected:
-    OiProperty(QDomNode desc);
+    Property(QDomNode desc);
 
     QStringList valid;
 

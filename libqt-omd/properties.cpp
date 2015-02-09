@@ -2,11 +2,13 @@
 
 #include "properties.h"
 
-OiProperties::OiProperties(QDomNode desclist)
+using namespace Oi;
+
+Properties::Properties(QDomNode desclist)
 {
     QDomNode desc = desclist.firstChild();
     while (!desc.isNull()) {
-        OiProperty prop(desc);
+        Property prop(desc);
 
         if (prop.isValid())
             properties[prop.key] = prop;
@@ -15,7 +17,7 @@ OiProperties::OiProperties(QDomNode desclist)
     }
 }
 
-OiProperty::OiProperty(QDomNode desc)
+Property::Property(QDomNode desc)
 {
     key   = desc.firstChildElement("propname").text();
     value = desc.firstChildElement("value").text();
@@ -30,7 +32,7 @@ OiProperty::OiProperty(QDomNode desc)
         flags |= PROP_VALID;
 }
 
-OiProperty & OiProperty::operator =(const QString &newValue)
+Property & Property::operator =(const QString &newValue)
 {
     if (valid.contains(newValue)) {
         value = newValue;
@@ -40,7 +42,7 @@ OiProperty & OiProperty::operator =(const QString &newValue)
     return *this;
 }
 
-bool OiProperty::isValid(QString check)
+bool Property::isValid(QString check)
 {
    return valid.contains(check.isEmpty() ? value : check);
 }
