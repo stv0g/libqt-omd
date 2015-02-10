@@ -47,6 +47,11 @@ void Camera::initialize()
 
 }
 
+QUrl Camera::getUrl() const
+{
+    return QUrl("http://192.168.0.10");
+}
+
 bool Camera::isOnline()
 {
     QTcpSocket socket;

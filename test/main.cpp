@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
     QAction openBrowser("Open Browser", &tray);
     QObject::connect(&openBrowser, &QAction::triggered, [&]() {
-        QDesktopServices::openUrl(QUrl("http://192.168.0.10"));
+        QDesktopServices::openUrl(cam.getUrl());
     });
 
     QAction closeApp("Quit", &tray);
