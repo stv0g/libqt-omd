@@ -228,6 +228,7 @@ void Camera::parseXml(QString cgi, QDomDocument body)
 
     if      (cgi == "get_unusedcapacity") parseCapacity(body);
     else if (cgi == "get_commandlist")    parseCommandList(body);
+    else if (cgi == "get_caminfo")        parseCamInfo(body);
     else if (cgi == "get_camprop")        parseProperties(body);
     else if (cgi == "set_camprop")        parseProperties(body);
     else if (cgi == "get_connectmode")    parseConnectMode(body);
@@ -276,9 +277,11 @@ void Camera::parseCamInfo(QDomDocument body)
     QDomElement elm = body.firstChildElement("caminfo");
     if (!elm.isNull()) {
         QDomElement model = elm.firstChildElement("model");
-        mCamModel = model.text();
+        if (!model.isNull()) {
+            mCamModel = model.text();
 
-        emit modelUpdated(mCamModel);
+            emit modelUpdated(mCamModel);
+        }
     }
 }
 
