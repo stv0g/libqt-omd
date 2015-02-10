@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/icon">
         <file>libqt-omd_bw.png</file>
+        <file>libqt-omd_gray.png</file>
     </qresource>
 </RCC>

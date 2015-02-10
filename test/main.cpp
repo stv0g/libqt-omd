@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     menu.addSeparator();
     menu.addAction(&closeApp);
 
-    QIcon icon(":/icon/libqt-omd_bw.png");
+    QIcon icon(":/icon/libqt-omd_gray.png");
     tray.setIcon(icon);
     tray.setContextMenu(&menu);
     tray.show();
