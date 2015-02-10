@@ -92,6 +92,7 @@ public:
     void /* FIXME */        getCommandList();
     QList<QString>          getImageList(bool reserved = false);
     QImage                  getImage(QString name = QString(), QSize resolution = QSize());
+    QUrl                    getUrl() const;
 
     Oi::LiveView *          startLiveView(QSize resolution = QSize(640, 480), int port = 22222);
     void                    stopLiveView();
@@ -101,6 +102,7 @@ public:
     enum CamMode            camMode();
 
 public slots:
+    void                    initialize();
     void                    switchCamMode(enum CamMode mode);
     void                    controlZoom(enum ZoomMode cmd);
     void                    takeShot();
@@ -142,7 +144,6 @@ protected:
 
     /* Helpers */
     void                    completePendingRequests();
-    void                    initialize();
 
     /* Members */
     QHostAddress            mAddress;

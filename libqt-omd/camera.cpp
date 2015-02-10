@@ -140,9 +140,8 @@ void Camera::requestFinished(QNetworkReply *reply)
 
     if (reply->error() == QNetworkReply::NoError) {
         QString contentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
-        QString cgi         = reply->attribute(QNetworkRequest::User).toString();
-
-        cacheMap[cgi] = QDateTime::currentDateTimeUtc();
+        QString cgi = QFileInfo(reply->url().fileName()).baseName();
+        QMap<QString, QString> params = Oi::pairsToMap(QUrlQuery(reply->url()).queryItems());
 
         if (contentType == "text/xml"         && reply->size() > 0) {
             QDomDocument body;

@@ -17,7 +17,8 @@ SOURCES += camera.cpp \
 HEADERS  += camera.h \
     liveview.h \
     properties.h \
-    image.h
+    image.h \
+    helpers.h
 
 unix {
     target.path = /usr/lib
