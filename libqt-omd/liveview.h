@@ -27,7 +27,9 @@
 #ifndef LIVEVIEW_H
 #define LIVEVIEW_H
 
+#include <QObject>
 #include <QUdpSocket>
+#include <QByteArray>
 
 #include "camera.h"
 
@@ -36,19 +38,30 @@ namespace Oi {
     class LiveView;
 }
 
-class Oi::LiveView
+class Oi::LiveView : QObject
 {
+    Q_OBJECT
+
     public:
         LiveView(Oi::Camera *c);
 
         void start();
         void stop();
 
+    signals:
+        void newFrame();
+
     protected:
+        void readPendingChunks();
+        void processChunk(QByteArray);
+
         int          mPort = 48482;
         QUdpSocket   mSocket;
 
-        Camera *mCam;
+        quint32      mStreamId;
+        quint32      mFrameId;
+
+        Oi::Camera *mCam;
 };
 
 #endif // LIVEVIEW_H

@@ -36,7 +36,6 @@ Image::Image() :
 
 Image::Image(const Image &img) :
     mCam(img.mCam),
-    mPixels(img.mPixels),
     mPath(img.mPath),
     mDate(img.mDate),
     mAttributes(img.mAttributes),

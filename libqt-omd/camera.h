@@ -28,6 +28,7 @@
 
 #include <QHostAddress>
 #include <QImage>
+#include <QUrl>
 #include <QDateTime>
 #include <QtXml/QDomDocument>
 #include <QNetworkAccessManager>
@@ -35,6 +36,7 @@
 
 #include "properties.h"
 #include "image.h"
+
 class QNetworkAccessManager;
 class QNetworkReply;
 class QNetworkRequest;
@@ -42,6 +44,7 @@ class QNetworkRequest;
 namespace Oi {
     class LiveView;
     class Camera;
+    class Image;
 }
 
 class Oi::Camera : public QObject
@@ -81,25 +84,25 @@ public:
     void                    requestCamInfo();
     void                    requestCapacity();
     void                    requestConnectMode();
-    void                    requestCommandList();
-    void                    requestImageList(QString dir = "/DCIM/100OLYMP", bool reserved = false);
+    void                    requestCommands();
+    void                    requestProperties();
+    void                    requestImages(QString dir = "/DCIM/100OLYMP", bool reserved = false);
     void                    requestImage(QString name = QString(), QSize resolution = QSize(-1, -1));
 
     /* Synchronous getters */
-    QString                 getCamInfo();
-    unsigned                getCapacity();
-    enum ConnectMode        getConnectMode();
-    void /* FIXME */        getCommandList();
-    QList<QString>          getImageList(bool reserved = false);
-    QImage                  getImage(QString name = QString(), QSize resolution = QSize());
-    QUrl                    getUrl() const;
+    QString                 camModel() const { return mCamModel; }
+    unsigned                unusedCapacity() const { return mUnusedCapacity; }
+    QHash<QString, Image>   images() const { return mImages; }
+    QImage                  image(QString name = QString(), QSize resolution = QSize()) const;
+    QUrl                    url() const { return QUrl(QString("http://") + mAddress.toString()); }
+
+    bool                    isOnline();
+    enum ConnectMode        connectMode() const { return mConnectMode; }
+    enum CamMode            camMode() const { return mCamMode; }
+    const Oi::Properties *  properties() const { return &mCamProperties; }
 
     Oi::LiveView *          startLiveView(QSize resolution = QSize(640, 480), int port = 22222);
     void                    stopLiveView();
-
-    /* Cached getters */
-    bool                    isOnline();
-    enum CamMode            camMode();
 
 public slots:
     void                    initialize();
@@ -112,8 +115,10 @@ public slots:
 
 signals:
     void                    receivedImage(QImage);
-    void                    capacityUpdated(long unsigned);
-    void                    changedProperty(QString key, QString value);
+    void                    imagesUpdated(QHash<QString, Image>);
+    void                    capacityUpdated(unsigned long c);
+    void                    propertyChanged(Oi::Property *prop);
+    void                    propertiesUpdated(Oi::Properties *props);
     void                    changedMode(enum CamMode);
     void                    modelUpdated(QString);
     void                    poweredOff();
@@ -151,16 +156,18 @@ protected:
     QList<QNetworkReply *>  mPendingReplies;
     QNetworkAccessManager   mNetworkManager;
 
+    Oi::Properties          mCamProperties;
+
     /* Properties */
     enum CamMode            mCamMode;
     enum ConnectMode        mConnectMode;
 
     QString                 mCamModel;
-    long unsigned           mUnusedCapacity;
+    unsigned long           mUnusedCapacity;
 
     QDomDocument            mCommandList;
 
-    QHash<QString, Image> mImages;
+    QHash<QString, Image>   mImages;
 
     /* Constants */
     static const QString    cUserAgent;

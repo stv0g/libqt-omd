@@ -13,9 +13,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        viewer.cpp
+    mainwindow.cpp
 
-HEADERS  += viewer.h
+HEADERS  += \
+    mainwindow.h
 
 win32:      CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libqt-omd/release/ -llibqt-omd
 else:win32: CONFIG(debug,   debug|release): LIBS += -L$$OUT_PWD/../libqt-omd/debug/ -llibqt-omd
@@ -28,3 +29,6 @@ CONFIG += c++11
 
 RESOURCES += \
     images.qrc
+
+FORMS += \
+    mainwindow.ui

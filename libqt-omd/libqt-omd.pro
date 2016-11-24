@@ -12,13 +12,15 @@ TEMPLATE = lib
 SOURCES += camera.cpp \
     liveview.cpp \
     properties.cpp \
-    image.cpp
+    image.cpp \
+    imagelistmodel.cpp
 
 HEADERS  += camera.h \
     liveview.h \
     properties.h \
     image.h \
-    helpers.h
+    helpers.h \
+    imagelistmodel.h
 
 unix {
     target.path = /usr/lib

@@ -34,6 +34,7 @@
 #include "image.h"
 #include "properties.h"
 #include "camera.h"
+#include "helpers.h"
 
 using namespace Oi;
 
@@ -41,40 +42,30 @@ const QString Camera::cUserAgent = "libqt-omd v0.1";
 
 Camera::Camera() :
     mAddress("192.168.0.10"),
+    mCamProperties(this),
     mCamMode(MODE_UNKNOWN),
     mConnectMode(CONNECT_UNKNOWN)
 {
     connect(&mNetworkManager, &QNetworkAccessManager::finished, this, &Camera::requestFinished);
-
-    if (isOnline())
-        initialize();
-    else
-        qWarning() << "[libqt-omd] Camera is not online";
 }
 
 void Camera::initialize()
 {
+    requestConnectMode();
+    requestCamInfo();
+    requestCommands();
+
     switchCamMode(MODE_PLAY);
     completePendingRequests();
 
-    requestCamInfo();
     requestCapacity();
-    requestConnectMode();
-    requestCommandList();
-    requestImageList();
+    requestImages();
 
+    switchCamMode(MODE_RECORD);
     completePendingRequests();
 
-    qDebug() << "[libqt-omd] CamModel: " << mCamModel;
-    qDebug() << "[libqt-omd] UnusedCapacity: " << mUnusedCapacity;
-    qDebug() << "[libqt-omd] CamMode: " << mCamMode;
-    qDebug() << "[libqt-omd] ConnectMode: " << mConnectMode;
-
-}
-
-QUrl Camera::getUrl() const
-{
-    return QUrl("http://192.168.0.10");
+    requestProperties();
+    completePendingRequests();
 }
 
 bool Camera::isOnline()
@@ -96,6 +87,11 @@ QNetworkRequest Camera::makeRequest(QString cgi, QMap<QString, QString> params)
 
     for (QString key : params.keys())
         paramList.push_back(qMakePair(key, params[key]));
+
+    if (cgi == "switch_cammode") {
+        QPair<QString, QString> tmp = paramList.takeFirst();
+        paramList.append(tmp);
+    }
 
     query.setQueryItems(paramList);
     url.setQuery(query);
@@ -146,7 +142,7 @@ void Camera::requestFinished(QNetworkReply *reply)
         if (contentType == "text/xml"         && reply->size() > 0) {
             QDomDocument body;
             if (body.setContent(reply->readAll())) {
-                qDebug() << "[libqt-omd]   Content:" <<  body.toString();
+                //qDebug() << "[libqt-omd]   Content:" <<  body.toString();
                 parseXml(cgi, body);
             }
             else
@@ -199,9 +195,20 @@ void Camera::powerOff()                 { get("exec_pwoff"); }
 void Camera::requestCamInfo()           { get("get_caminfo"); }
 void Camera::requestCapacity()          { get("get_unusedcapacity"); }
 void Camera::requestConnectMode()       { get("get_connectmode"); }
-void Camera::requestCommandList()       { get("get_commandlist"); }
+void Camera::requestCommands()          { get("get_commandlist"); }
 
-void Camera::requestImageList(QString dir, bool rsv) {
+void Camera::requestProperties()
+{
+    QMap<QString, QString> params;
+
+    params["com"] = "desc";
+    params["propname"] = "desclist";
+
+    get("get_camprop", params);
+
+}
+
+void Camera::requestImages(QString dir, bool rsv) {
     QMap<QString, QString> params;
 
     params["DIR"] = dir.replace('/', "%2F");
@@ -228,13 +235,16 @@ void Camera::switchCamMode(CamMode mode)
         case MODE_PLAY:
             params["mode"] = "play";
             break;
+
         case MODE_RECORD:
             params["mode"] = "rec";
-            params["lvqty"] = "0640x0480"; // FIXME allow other liveViewQualities
+            params["lvqty"] = "0320x0240"; // FIXME allow other liveViewQualities
             break;
+
         case MODE_SHUTTER:
             params["mode"] = "shutter";
             break;
+
         case MODE_UNKNOWN:
         default:
             return;
@@ -275,6 +285,8 @@ void Camera::parseList(QString cgi, QByteArray body)
             mImages.insert(img.path(), img);
         }
     }
+
+    emit imagesUpdated(mImages);
 }
 
 void Camera::parseImage(QString cgi, QByteArray body)
@@ -313,7 +325,7 @@ void Camera::parseCapacity(QDomDocument body)
 {
     QDomElement elm = body.firstChildElement("unused");
     if (!elm.isNull()) {
-        mUnusedCapacity = elm.text().toUInt();
+        mUnusedCapacity = elm.text().toULong();
 
         emit capacityUpdated(mUnusedCapacity);
     }
@@ -333,15 +345,19 @@ void Camera::parseConnectMode(QDomDocument body)
         else if (elm.text() == "shared")
             mConnectMode = CONNECT_SHARED;
         else
-            qWarning() << "[libqt-omd] Warning: unknown connectMode:" << elm.text();
-    }
+            mConnectMode = CONNECT_UNKNOWN;
 
+        emit connected(mConnectMode);
+    }
 }
 
 void Camera::parseProperties(QDomDocument body)
 {
-    Q_UNUSED(body)
-    // FIXME implement
+    QDomElement elm = body.firstChildElement("desclist");
+    if (!elm.isNull()) {
+        mCamProperties.parse(elm);
+        emit propertiesUpdated(&mCamProperties);
+    }
 }
 
 void Camera::parseTakeMisc(QDomDocument body)

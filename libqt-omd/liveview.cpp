@@ -28,5 +28,66 @@
 using namespace Oi;
 
 LiveView::LiveView(Camera *c) :
-    mCam(c)
+    mCam(c),
+    mSocket(this)
 { }
+
+void LiveView::start()
+{
+    mSocket->bind(QHostAddress::LocalHost, mPort);
+
+    mCam->get()
+
+    connect(mSocket, &QUdpSocket::readyRead, this, &LiveView::readPendingChunks);
+}
+
+void LiveView::stop()
+{
+
+}
+
+void LiveView::readPendingChunks()
+{
+    while (udpSocket->hasPendingDatagrams()) {
+        QByteArray datagram;
+
+        datagram.resize(udpSocket->pendingDatagramSize());
+
+        QHostAddress sender;
+        quint16 senderPort;
+
+        mSocket->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
+
+        processChunk(datagram);
+    }
+}
+
+void LiveView::processChunk(QByteArray chunk)
+{
+    const char *data = chunk.constData();
+    const char *payload = data + 12;
+
+    const quint16 *packetType = reinterpret_cast<const quint16 *>(data + 0);
+    const quint16 *chunkNo    = reinterpret_cast<const quint16 *>(data + 2);
+    const quint32 *frameId    = reinterpret_cast<const quint32 *>(data + 4);
+    const quint32 *streamId   = reinterpret_cast<const quint16 *>(data + 8);
+
+    qDebug() << "packetType: " << *packetType << " chunkNo: " << *chunkNo << " frameId: " << *frameId << " streamId: " << *streamId;
+
+    switch (*packetType) {
+        case 0x9060: /* Start of Frame */
+            break;
+
+        case 0x8060: /* Middle of Frame */
+            break;
+
+        case 0x80e0: /* End of Frame */
+            break;
+    }
+}
+
+void LiveView::processFrame()
+{
+
+}
+

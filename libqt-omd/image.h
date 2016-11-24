@@ -72,8 +72,6 @@ class Oi::Image : public QImage
 
         Oi::Camera *mCam;
 
-        QMap<QSize, QImage> mPixels;
-
         QString mPath;
         QDateTime mDate;
 

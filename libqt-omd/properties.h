@@ -23,32 +23,33 @@
  * along with libqt-omd. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef PROPERTIES_H
 #define PROPERTIES_H
 
-#include <QString>
-#include <QStringList>
 
-#include "camera.h"
+#include <QStringList>
+#include <QDomNode>
+
 #include "image.h"
 
 namespace Oi {
+    class Camera;
     class Property;
     class Properties;
 }
 
-class Oi::Properties
+class Oi::Properties :
+    public QMap<QString, Oi::Property>
 {
 public:
-    Properties(QDomNode desclist);
+    Properties(Oi::Camera *c);
 
+    void parse(QDomNode desclist);
     Oi::Property& operator[](const QString &key);
 
 protected:
     Oi::Camera *mCam;
 
-    QMap<QString, Oi::Property> mProperties;
 };
 
 class Oi::Property
@@ -64,15 +65,20 @@ class Oi::Property
 
 public:
     Property() { }
-    Property(QDomElement desc);
 
     Property& operator =(const QString &value);
-    operator QString();
 
     bool isValid(QString value = QString());
 
+    /* Getter */
+    const QString & key() const { return mKey; }
+    const QString & value() const { return mValue; }
+    const QStringList & valids() const { return mValid; }
+
 protected:
-    Property(QDomNode desc);
+    Property(Oi::Camera *c, QDomNode desc);
+
+    Oi::Camera *mCam;
 
     QStringList mValid;
 

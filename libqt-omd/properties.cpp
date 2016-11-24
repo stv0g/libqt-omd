@@ -29,24 +29,32 @@
 
 using namespace Oi;
 
-Properties::Properties(QDomNode desclist)
+Properties::Properties(Camera *c) :
+    mCam(c)
+{ }
+
+void Properties::parse(QDomNode desclist)
 {
-    QDomNode desc = desclist.firstChild();
+    QDomNode desc = desclist.firstChildElement("desc");
     while (!desc.isNull()) {
-        Property prop(desc);
+        Property prop(mCam, desc);
 
         if (prop.isValid())
-            mProperties[prop.mKey] = prop;
+            insert(prop.mKey, prop);
 
-        desc = desc.nextSibling();
+        desc = desc.nextSiblingElement("desc");
     }
 }
 
-Property::Property(QDomNode desc)
+Property::Property(Camera *c, QDomNode desc) :
+    mCam(c)
 {
     mKey   = desc.firstChildElement("propname").text();
     mValue = desc.firstChildElement("value").text();
-    mValid = desc.firstChildElement("enum").text().split(' ');
+
+    QDomElement validEnum = desc.firstChildElement("enum");
+    if (!validEnum.isNull())
+        mValid = validEnum.text().split(' ');
 
     QString attr = desc.firstChildElement("attribute").text();
     if (attr.contains("set"))

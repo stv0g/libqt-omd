@@ -3,8 +3,9 @@
 #include <QMenu>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QMessageBox>
 
-#include "viewer.h"
+#include "mainwindow.h"
 #include "camera.h"
 
 int main(int argc, char *argv[])
@@ -13,37 +14,24 @@ int main(int argc, char *argv[])
     QSystemTrayIcon tray(&app);
     QMenu menu;
 
-    Viewer viewer;
     Oi::Camera cam;
+    MainWindow win(&cam);
 
     /* Actions */
-    QAction showLiveView("Show Live View", &tray);
-    QObject::connect(&showLiveView, &QAction::triggered, [&]() {
-        viewer.show();
-    });
-
-    QAction openBrowser("Open Browser", &tray);
-    QObject::connect(&openBrowser, &QAction::triggered, [&]() {
-        QDesktopServices::openUrl(cam.getUrl());
-    });
-
+    QAction openWindow("Open", &tray);
     QAction closeApp("Quit", &tray);
-    QObject::connect(&closeApp, &QAction::triggered, [&]() {
-        app.quit();
-    });
+    QAction openBrowser("Open Browser", &tray);
 
-    /* Camera Signals */
-    QAction sizeInfo("Capacity: ?", &tray);
-    QObject::connect(&cam, &Oi::Camera::capacityUpdated, [&](int cap) {
-        sizeInfo.setText(QString("Capacity: %1").arg(cap));
-        tray.setContextMenu(&menu);
+    QObject::connect(&closeApp,   &QAction::triggered, &win, &QMainWindow::close);
+    QObject::connect(&openWindow, &QAction::triggered, &win, &QMainWindow::show);
+
+    QObject::connect(&openBrowser, &QAction::triggered, [&]() {
+        QDesktopServices::openUrl(cam.url());
     });
 
     /* Context Menu */
-    menu.addAction(&showLiveView);
+    menu.addAction(&openWindow);
     menu.addAction(&openBrowser);
-    menu.addSeparator();
-    menu.addAction(&sizeInfo);
     menu.addSeparator();
     menu.addAction(&closeApp);
 
@@ -51,6 +39,12 @@ int main(int argc, char *argv[])
     tray.setIcon(icon);
     tray.setContextMenu(&menu);
     tray.show();
+
+    /* Initialize camera */
+    if (cam.isOnline())
+        cam.initialize();
+    else
+        QMessageBox::critical(&win, "Error", "Failed to connect to camera!");
 
     return app.exec();
 }
