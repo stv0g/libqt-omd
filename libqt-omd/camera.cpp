@@ -34,6 +34,7 @@
 #include "image.h"
 #include "properties.h"
 #include "camera.h"
+#include "helpers.h" /* added 4-30-16 by spcampbell. Would not compile without */
 
 using namespace Oi;
 
