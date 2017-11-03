@@ -1,8 +1,8 @@
 # libqt-omd (Work In Progress)
 
-'libqt-omd' is a software library to control Olympus OM-D and Pen digital cameras over wifi.
+`libqt-omd` is a software library to control Olympus OM-D and Pen digital cameras over wifi.
 
-Take [a look at the wiki](https://dev.0l.de/wiki/projects/omd/) for more information and protocol reverse engineering.
+Take [a look at the wiki](https://dev.0l.de/projects/omd/start) for more information and protocol reverse engineering.
 
 The library is based on Qt4 / Qt5 and implements two classes:
 
